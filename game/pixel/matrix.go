@@ -3,6 +3,7 @@ package main
 import (
   "image"
 	"os"
+  "time"
 	_ "image/png"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -54,16 +55,21 @@ func run() {
   rotationAngle := 0.0
   lightMaskValue := 0
   lightMask := colornames.White
+  last := time.Now()
 
 	for !win.Closed() {
-    rotationAngle += 0.001
+    // Keep animation smoother with whatever FPS we're using
+    deltaTime := time.Since(last).Seconds()
+    last = time.Now()
+
+    rotationAngle += 0.1 * deltaTime
 
     switch lightMaskValue {
     case 1:
       lightMask = colornames.Grey
     case 10:
       lightMask = colornames.White
-    case 30:
+    case 20:
       lightMask = colornames.White
       lightMaskValue = 0
     }
