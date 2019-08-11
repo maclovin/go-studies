@@ -69,6 +69,11 @@ func run() {
 
   last := time.Now()
 
+  var (
+		frames = 0
+		second = time.Tick(time.Second)
+	)
+
   for !win.Closed() {
     deltaTime := time.Since(last).Seconds()
     last = time.Now()
@@ -96,7 +101,6 @@ func run() {
       camPos.Y += camSpeed * deltaTime
     }
 
-
     fmt.Println(color.RGBA{0,0,0,255})
 
     win.Clear(colornames.Black)
@@ -107,6 +111,14 @@ func run() {
 		}
 
     win.Update()
+
+    frames++
+select {
+case <-second:
+  win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
+  frames = 0
+default:
+}
   }
 }
 
