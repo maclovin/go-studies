@@ -4,6 +4,9 @@ import (
   "image"
   "os"
   "fmt"
+  "time"
+  "image/color"
+  "math/rand"
   _ "image/png"
 
   "github.com/faiface/pixel"
@@ -54,13 +57,55 @@ func run() {
 
   cupsSpritesheet, err := loadPicture("CUPS_SPRITE.png")
 
-  cup := pixel.NewSprite(cupsSpritesheet, getSpritePosition(cupsSpritesheet, 5))
+  var (
+    camPos = pixel.ZV
+    camSpeed = 500.0
+
+    cups []*pixel.Sprite
+    cupMatrices []pixel.Matrix
+  )
 
   fmt.Println("Running...")
+
+  last := time.Now()
+
   for !win.Closed() {
+    deltaTime := time.Since(last).Seconds()
+    last = time.Now()
+
+    cam := pixel.IM.Scaled(pixel.ZV, 1).Moved(win.Bounds().Center().Sub(camPos))
+    win.SetMatrix(cam)
+
+    if win.JustPressed(pixelgl.MouseButtonLeft) {
+      newCup := pixel.NewSprite(cupsSpritesheet, getSpritePosition(cupsSpritesheet, rand.Intn(6)))
+      cups = append(cups, newCup)
+      mouse := cam.Unproject(win.MousePosition())
+      cupMatrices = append(cupMatrices, pixel.IM.Scaled(pixel.ZV, 1).Moved(mouse))
+    }
+
+    if win.Pressed(pixelgl.KeyLeft) {
+      camPos.X -= camSpeed * deltaTime
+    }
+    if win.Pressed(pixelgl.KeyRight) {
+      camPos.X += camSpeed * deltaTime
+    }
+    if win.Pressed(pixelgl.KeyDown) {
+      camPos.Y -= camSpeed * deltaTime
+    }
+    if win.Pressed(pixelgl.KeyUp) {
+      camPos.Y += camSpeed * deltaTime
+    }
+
+
+    fmt.Println(color.RGBA{0,0,0,255})
+
     win.Clear(colornames.Black)
-    table.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
-    cup.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
+    table.Draw(win, pixel.IM.Moved(pixel.Vec{camPos.X, camPos.Y}))
+
+    for i, cup := range cups {
+			cup.Draw(win, cupMatrices[i])
+		}
+
     win.Update()
   }
 }
