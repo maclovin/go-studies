@@ -113,12 +113,12 @@ func run() {
     win.Update()
 
     frames++
-select {
-case <-second:
-  win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
-  frames = 0
-default:
-}
+    select {
+    case <-second:
+      win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
+      frames = 0
+    default:
+    }
   }
 }
 
