@@ -24,7 +24,7 @@ func loadPicture(path string) (pixel.Picture, error) {
 	return pixel.PictureDataFromImage(img), nil
 }
 
-// This badboy just normalize this weird pixel way to handle vectors...
+// Normalize the pixel way to handle vectors.
 func toPixelVector(win *pixelgl.Window, x float64, y float64) pixel.Vec {
 	var (
 		newY = win.Bounds().Max.Y - y
@@ -35,9 +35,10 @@ func toPixelVector(win *pixelgl.Window, x float64, y float64) pixel.Vec {
 
 func run() {
 	cfg := pixelgl.WindowConfig{
-		Title:  "Midnight Cocktail",
-		Bounds: pixel.R(0, 0, 500, 500),
-		VSync:  true,
+		Title:     "Coordinates",
+		Bounds:    pixel.R(0, 0, 500, 500),
+		VSync:     true,
+		Resizable: true,
 	}
 
 	win, err := pixelgl.NewWindow(cfg)
@@ -56,10 +57,10 @@ func run() {
 	)
 
 	fmt.Println("Running...")
-	fmt.Println("WINDOW BOUNDS", win.Bounds().Max.X-100)
+
 	for !win.Closed() {
 		win.Clear(pixel.RGB(1, 1, 1))
-		point.Draw(win, pixel.IM.Moved(toPixelVector(win, 250, 250)))
+		point.Draw(win, pixel.IM.Moved(toPixelVector(win, win.Bounds().Min.X+200, win.Bounds().Min.Y+200)))
 
 		win.Update()
 
