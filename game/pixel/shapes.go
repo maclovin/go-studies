@@ -109,7 +109,7 @@ func run() {
 			lightMaskValue = 0
 		}
 
-		lightMaskValue += 1
+		lightMaskValue++
 		win.Clear(colornames.Black)
 		triangleLight.Draw(win)
 		triangle1.DrawColorMask(win, pixel.IM.Scaled(pixel.ZV, 3).Rotated(pixel.ZV, rotationAngle).Moved(pixel.Vec{100, 100}), lightMask)
