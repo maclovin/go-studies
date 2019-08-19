@@ -12,6 +12,31 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 )
 
+type Gridsystem struct {
+	parentBounds pixel.Rect
+	margin       pixel.Vec
+	columnCount  float64
+}
+
+// TODO
+func (g *Gridsystem) getColumn(index float64) pixel.Rect {
+	var (
+		pieces = g.columnCount
+		Min    = pixel.Vec{index * (g.parentBounds.Max.X / pieces), g.parentBounds.Min.Y}
+		Max    = pixel.Vec{index*(g.parentBounds.Max.X/pieces) + g.parentBounds.Max.X/pieces, g.parentBounds.Max.Y}
+	)
+
+	return pixel.Rect{Min, Max}
+}
+
+func (g *Gridsystem) setColumns(columns float64) {
+	g.columnCount = columns
+}
+
+func (g *Gridsystem) setMargin(margin pixel.Vec) {
+	g.margin = margin
+}
+
 // Positions returns some values useful to anchor any component with the bound
 type Positions struct {
 	TopLeft, TopRight, BottomLeft, BottomRight, CenterTop, CenterRight, CenterBottom, CenterLeft pixel.Vec
@@ -61,7 +86,7 @@ func resizedWindow(window *pixelgl.Window, boundsStore *pixel.Rect) bool {
 func run() {
 	cfg := pixelgl.WindowConfig{
 		Title:     "Resize me",
-		Bounds:    pixel.R(0, 0, 148, 148),
+		Bounds:    pixel.R(0, 0, 1000, 500),
 		VSync:     true,
 		Resizable: true,
 	}
@@ -71,13 +96,15 @@ func run() {
 		panic(err)
 	}
 
-	win.SetSmooth(false)
-
-	// TODO
 	imd := imdraw.New(nil)
-
 	pointPic, err := loadPicture("POINT.png")
 	point := pixel.NewSprite(pointPic, pointPic.Bounds())
+	gridIndPic, err := loadPicture("GRID_INDICATOR.png")
+
+	if err != nil {
+		panic(err)
+	}
+	gridInd := pixel.NewSprite(gridIndPic, gridIndPic.Bounds())
 
 	var (
 		frames       = 0
@@ -86,13 +113,16 @@ func run() {
 	)
 
 	fmt.Println("Running...")
-
-	imd.Color = pixel.RGB(0, 0, 0)
+	fmt.Println(win.Bounds())
+	imd.Color = pixel.RGB(1, 0, 1)
 	imd.Push(anchorTo(win.Bounds(), pixel.Vec{50, 50}).TopLeft, anchorTo(win.Bounds(), pixel.Vec{50, 50}).BottomRight)
 	imd.Rectangle(0)
 
+	grid := Gridsystem{win.Bounds(), pixel.Vec{0, 0}, 8}
+	fmt.Println(grid.getColumn(1))
+
 	for !win.Closed() {
-		win.Clear(pixel.RGB(1, 1, 1))
+		win.Clear(pixel.RGB(0, 0, 0))
 		point.Draw(win, pixel.IM.Moved(anchorTo(win.Bounds(), pixel.Vec{25, 25}).TopLeft))
 		point.Draw(win, pixel.IM.Moved(anchorTo(win.Bounds(), pixel.Vec{25, 25}).TopRight))
 		point.Draw(win, pixel.IM.Moved(anchorTo(win.Bounds(), pixel.Vec{25, 25}).BottomRight))
@@ -106,12 +136,24 @@ func run() {
 			fmt.Println("Window Resized", windowBounds)
 
 			imd = imdraw.New(nil)
-			imd.Color = pixel.RGB(0, 0, 0)
+			imd.Color = pixel.RGB(1, 0, 1)
 			imd.Push(anchorTo(win.Bounds(), pixel.Vec{50, 50}).TopLeft, anchorTo(win.Bounds(), pixel.Vec{50, 50}).BottomRight)
 			imd.Rectangle(0)
+			grid = Gridsystem{win.Bounds(), pixel.Vec{0, 0}, 8}
 		}
 
 		imd.Draw(win)
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(0), pixel.Vec{13, 25}).TopLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(0), pixel.Vec{13, 25}).CenterLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(1), pixel.Vec{13, 25}).TopLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(2), pixel.Vec{13, 25}).TopLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(3), pixel.Vec{13, 25}).TopLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(4), pixel.Vec{13, 25}).CenterLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(4), pixel.Vec{13, 25}).TopLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(5), pixel.Vec{13, 25}).TopLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(6), pixel.Vec{13, 25}).TopLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(7), pixel.Vec{13, 25}).TopLeft))
+		gridInd.Draw(win, pixel.IM.Moved(anchorTo(grid.getColumn(7), pixel.Vec{13, 25}).CenterLeft))
 		win.Update()
 		frames++
 		select {
